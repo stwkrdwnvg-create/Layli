@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="B1 Korrektur">
+<meta name="theme-color" content="#16204A">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Zertifikat B1 neu · Korrektur</title>
+<style>
+:root{--bg:#0D1230;--card:#18214A;--ink:#E8ECFF;--mut:#9AA6D0;--line:#2B376B;--hero:#222E66;--L:#2563EB;--H:#7C3AED;--acc:#60A5FA;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+.w{max-width:760px;margin:0 auto;padding:14px 14px 70px}
+.hero{background:linear-gradient(135deg,var(--hero),#2A3B7C);color:#fff;border-radius:22px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.hero h1{margin:0 0 4px;font-size:22px}.hero p{margin:0;opacity:.9;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+label{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;display:block;margin-top:6px}
+select{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:14px inherit;margin:4px 0 10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:0;border-radius:12px;padding:12px 16px;font:700 14px inherit;color:#fff;background:#3B82F6;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn.o{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.row .btn.main{flex:1 1 100%;background:#10B981}
+.qrow{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:6px 0;background:var(--bg);border:1px solid var(--line);border-radius:12px;gap:8px;flex-wrap:wrap}
+.qrow b{min-width:36px;font-size:14px}
+.opt-group{display:flex;gap:5px;flex-wrap:wrap}
+.opt-btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;min-width:34px;height:34px;font:700 13.5px inherit;cursor:pointer;padding:0 8px}
+.opt-btn.sel{background:var(--L);color:#fff;border-color:var(--L)}
+.badge-part{display:inline-block;background:var(--line);color:var(--ink);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;margin:10px 0 2px}
+.score-banner{padding:16px;border-radius:16px;margin-bottom:14px;color:#fff;font-weight:700;line-height:1.5}
+.score-banner.pass{background:linear-gradient(135deg,#059669,#10B981)}
+.score-banner.fail{background:linear-gradient(135deg,#DC2626,#EF4444)}
+.score-banner.info{background:linear-gradient(135deg,#334155,#475569)}
+.qbox{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0;background:var(--bg);font-size:14.5px}
+.qbox.ok{border-left:5px solid #10B981}
+.qbox.err{border-left:5px solid #EF4444}
+.qbox.sol{border-left:5px solid var(--acc)}
+.mut{color:var(--mut);font-size:13px}
+.hide{display:none !important}
+.seg{display:flex;gap:6px;margin:6px 0 4px}
+.seg button{flex:1;padding:9px 6px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:600 12.5px inherit;cursor:pointer}
+.seg button.on{background:#fff;color:#16204A}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="hero">
+    <h1>🎓 Zertifikat B1 neu · Korrektur</h1>
+    <p>15 Übungsprüfungen · Lesen &amp; Hören · nur Lösungen</p>
+  </div>
+
+  <div class="card">
+    <div class="g2">
+      <div><label>Modelltest</label><select id="mt"></select></div>
+      <div><label>Modul</label><select id="md"></select></div>
+    </div>
+    <label>Teil</label>
+    <select id="tl"></select>
+
+    <label>Antwortbogen (tippe auf deine Antwort)</label>
+    <div id="grid"></div>
+
+    <div class="row">
+      <button class="btn main" id="go">✅ Korrigieren</button>
+      <button class="btn o" id="show">👁️ Lösung zeigen</button>
+      <button class="btn o" id="clr">🗑️ Löschen</button>
+    </div>
+  </div>
+
+  <div class="card hide" id="oc">
+    <div class="seg" id="flt"><button data-f="a" class="on">Alle</button><button data-f="e">Nur Fehler</button></div>
+    <div id="out"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var SOL = {"L":{"1":["R","F","R","F","R","F","c","b","a","c","a","b","g","h","a","0","j","c","e","Ja","Nein","Ja","Nein","Ja","Nein","Nein","c","b","b","c"],"2":["R","R","F","R","F","R","a","c","b","c","a","b","h","0","j","g","b","i","f","Nein","Ja","Ja","Nein","Ja","Nein","Ja","a","c","b","c"],"3":["F","R","R","R","F","R","c","a","b","a","b","c","0","a","f","i","h","g","d","Ja","Ja","Nein","Ja","Nein","Nein","Ja","a","c","a","b"],"4":["R","F","R","F","F","R","a","b","b","b","a","c","j","f","h","0","e","g","b","Ja","Ja","Nein","Nein","Ja","Nein","Ja","a","b","a","c"],"5":["R","F","F","F","R","R","b","a","c","a","a","b","e","i","d","h","j","f","0","Nein","Ja","Ja","Nein","Nein","Nein","Ja","c","b","a","c"],"6":["R","F","R","R","F","F","b","a","c","b","c","a","0","j","h","e","f","i","a","Ja","Nein","Nein","Ja","Nein","Ja","Nein","b","c","b","c"],"7":["R","R","F","F","F","R","a","c","b","b","c","a","c","d","j","f","0","a","h","Nein","Ja","Nein","Ja","Nein","Nein","Ja","b","a","a","b"],"8":["R","F","R","F","R","F","c","b","a","c","a","b","f","a","0","d","i","g","j","Nein","Ja","Ja","Nein","Nein","Ja","Nein","a","c","b","b"],"9":["R","F","F","R","R","F","a","c","c","b","a","c","f","a","d","0","j","e","i","Nein","Ja","Nein","Nein","Ja","Ja","Ja","b","a","a","a"],"10":["R","F","R","R","F","R","b","a","c","a","b","c","0","g","h","i","d","b","j","Nein","Nein","Ja","Nein","Nein","Ja","Ja","c","a","b","a"],"11":["R","R","F","R","F","R","a","a","c","b","a","c","e","h","0","a","f","i","j","Nein","Ja","Nein","Nein","Ja","Ja","Ja","c","c","b","a"],"12":["R","R","R","F","F","F","b","a","c","b","a","c","0","g","d","j","c","a","h","Nein","Nein","Nein","Ja","Nein","Ja","Ja","b","a","b","c"],"13":["R","F","F","F","R","R","c","b","c","b","a","c","e","0","j","g","a","d","f","Nein","Ja","Ja","Nein","Ja","Ja","Nein","b","c","a","c"],"14":["F","R","F","F","F","R","b","a","b","c","b","a","i","c","f","e","0","a","h","Nein","Ja","Nein","Nein","Ja","Ja","Ja","c","b","a","b"],"15":["F","F","R","R","R","F","a","b","a","b","c","a","0","a","d","e","c","j","g","Nein","Nein","Ja","Nein","Ja","Ja","Nein","c","b","a","c"]},"H":{"1":["R","a","F","c","R","c","R","b","F","b","c","a","b","a","b","R","R","F","R","R","R","F","a","b","c","a","b","c","c","b"],"2":["R","c","R","b","F","a","R","b","F","b","a","c","b","c","a","R","F","R","F","F","R","R","c","a","b","c","b","c","c","b"],"3":["F","c","F","b","R","b","R","a","F","a","b","a","b","a","c","R","F","F","F","R","F","F","c","a","b","c","b","c","c","a"],"4":["F","c","F","c","F","b","R","c","F","b","b","c","c","a","a","F","F","R","F","R","F","R","b","c","a","b","b","b","a","b"],"5":["F","a","R","b","F","a","R","b","F","c","a","a","c","c","b","R","F","F","F","R","F","R","b","c","c","b","a","a","c","b"],"6":["R","b","R","b","R","c","F","a","R","c","c","c","b","a","c","R","F","R","R","F","F","F","a","c","a","b","b","a","c","b"],"7":["R","c","F","a","F","b","R","b","F","b","c","b","c","c","b","F","R","F","F","R","R","F","b","c","b","b","a","b","a","b"],"8":["R","a","F","b","F","b","F","c","F","c","b","a","c","a","a","R","F","R","F","F","F","F","b","c","b","c","a","b","a","a"],"9":["F","c","F","c","R","c","F","c","F","b","b","a","c","b","a","F","R","R","F","F","F","R","b","b","c","b","c","a","b","c"],"10":["F","c","R","c","R","b","F","b","F","b","c","a","c","b","c","R","R","F","F","F","R","F","c","a","b","b","b","c","c","c"],"11":["F","c","F","b","F","b","R","a","F","a","c","b","a","c","b","R","F","F","F","F","R","R","c","a","a","a","b","c","a","c"],"12":["R","b","F","c","R","c","F","a","F","c","c","c","b","a","c","R","F","R","F","R","R","F","c","b","a","c","b","c","b","c"],"13":["F","b","F","a","F","a","R","c","F","b","a","c","c","b","c","R","F","F","F","F","R","R","c","c","b","a","b","a","b","c"],"14":["F","a","F","b","R","b","R","a","F","a","c","b","c","b","a","F","R","F","R","F","R","F","b","c","a","a","c","c","b","b"],"15":["R","a","F","a","R","c","R","c","R","b","a","c","b","b","c","F","F","R","F","R","R","F","b","b","a","b","c","b","c","c"]}};
+  var memStore = {};
+  var store = {
+    get:function(k){try{return localStorage.getItem(k);}catch(e){return memStore[k]||null;}},
+    set:function(k,v){try{localStorage.setItem(k,v);}catch(e){memStore[k]=v;}}
+  };
+  var S = {ans:{}};
+  try{var raw=store.get('b1_ans_v1'); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+  function save(){store.set('b1_ans_v1',JSON.stringify({ans:S.ans}));}
+
+  var MOD = {L:'Lesen',H:'Hören'};
+  var PARTS = {
+    L:[['Alle (1–30)',1,30],['Teil 1 (1–6)',1,6],['Teil 2 (7–12)',7,12],['Teil 3 (13–19)',13,19],['Teil 4 (20–26)',20,26],['Teil 5 (27–30)',27,30]],
+    H:[['Alle (1–30)',1,30],['Teil 1 (1–10)',1,10],['Teil 2 (11–15)',11,15],['Teil 3 (16–22)',16,22],['Teil 4 (23–30)',23,30]]
+  };
+  var MP_TO_EP={30:100,29:97,28:93,27:90,26:87,25:83,24:80,23:77,22:73,21:70,20:67,19:63,18:60,17:57,16:53,15:50,14:47,13:43,12:40,11:37,10:33,9:30,8:27,7:23,6:20,5:17,4:13,3:10,2:7,1:3,0:0};
+
+  var $ = function(id){return document.getElementById(id);};
+  var elMt=$('mt'), elMd=$('md'), elTl=$('tl'), elGrid=$('grid'), elOc=$('oc'), elOut=$('out');
+  var lastOpts=null, filter='a';
+
+  elMt.innerHTML = Array.from({length:15},function(_,i){return '<option value="'+(i+1)+'">Modelltest '+(i+1)+'</option>';}).join('');
+  elMd.innerHTML = Object.keys(MOD).map(function(k){return '<option value="'+k+'">'+MOD[k]+'</option>';}).join('');
+
+  function fillTl(){
+    elTl.innerHTML = PARTS[elMd.value].map(function(p,i){return '<option value="'+i+'">'+p[0]+'</option>';}).join('');
+  }
+  function range(){var p=PARTS[elMd.value][+elTl.value]; return [p[1],p[2]];}
+  function key(){return elMt.value+'_'+elMd.value;}
+
+  function options(m,q){
+    if(m==='L'){
+      if(q<=6) return ['R','F'];
+      if(q<=12) return ['a','b','c'];
+      if(q<=19) return ['a','b','c','d','e','f','g','h','i','j','0'];
+      if(q<=26) return ['Ja','Nein'];
+      return ['a','b','c'];
+    }
+    if(q<=10) return (q%2===1)?['R','F']:['a','b','c'];
+    if(q<=15) return ['a','b','c'];
+    if(q<=22) return ['R','F'];
+    return ['a','b','c'];
+  }
+  function partLabel(m,q){
+    var L=PARTS[m];
+    for(var i=1;i<L.length;i++) if(q>=L[i][1]&&q<=L[i][2]) return L[i][0].split(' (')[0];
+    return '';
+  }
+  function disp(v){
+    if(v==='R') return 'Richtig'; if(v==='F') return 'Falsch';
+    return v;
+  }
+
+  function renderGrid(){
+    var m=elMd.value, r=range(), saved=S.ans[key()]||{}, h='', lastP='';
+    for(var q=r[0];q<=r[1];q++){
+      var pl=partLabel(m,q);
+      if(pl!==lastP){h+='<div class="badge-part">'+pl+'</div>';lastP=pl;}
+      h+='<div class="qrow"><b>'+q+'</b><div class="opt-group">';
+      options(m,q).forEach(function(o){
+        h+='<button type="button" class="opt-btn'+(saved[q]===o?' sel':'')+'" data-q="'+q+'" data-v="'+o+'">'+o+'</button>';
+      });
+      h+='</div></div>';
+    }
+    elGrid.innerHTML=h;
+  }
+  elGrid.onclick=function(e){
+    var b=e.target.closest('.opt-btn'); if(!b) return;
+    var q=+b.dataset.q, v=b.dataset.v, k=key();
+    S.ans[k]=S.ans[k]||{};
+    if(S.ans[k][q]===v) delete S.ans[k][q]; else S.ans[k][q]=v;
+    save(); renderGrid();
+  };
+
+  function evaluate(onlySol){
+    var mt=elMt.value, m=elMd.value, r=range(), s=r[0], e=r[1];
+    var keyArr=SOL[m][mt], user=S.ans[key()]||{};
+    var ok=0, total=0, items=[];
+    for(var q=s;q<=e;q++){
+      var sol=keyArr[q-1];
+      if(sol==='?'){items.push({q:q,cls:'sol',txt:'<b>'+q+'</b> · ⚠️ Lösung im Foto nicht lesbar'});continue;}
+      total++;
+      var u=user[q];
+      if(onlySol){items.push({q:q,cls:'sol',txt:'<b>'+q+'</b> · <b>'+disp(sol)+'</b>'});continue;}
+      if(u===sol){ok++;items.push({q:q,cls:'ok',txt:'✅ <b>'+q+'</b> · '+disp(u)});}
+      else items.push({q:q,cls:'err',err:1,txt:'❌ <b>'+q+'</b> · Du: '+(u?disp(u):'—')+' → Richtig: <b>'+disp(sol)+'</b>'});
+    }
+    var html='';
+    if(onlySol){
+      html+='<div class="score-banner info">🔑 Lösungen · Modelltest '+mt+' · '+MOD[m]+'</div>';
+      $('flt').classList.add('hide');
+    } else {
+      $('flt').classList.remove('hide');
+      if(total===30){
+        var ep=MP_TO_EP[ok], pass=ep>=60;
+        html+='<div class="score-banner '+(pass?'pass':'fail')+'">🎯 Modelltest '+mt+' · '+MOD[m]+': '+ok+' / 30 = '+ep+' / 100 Punkte<br>'+(pass?'🎉 Bestanden (≥ 60)':'⚠️ Noch nicht bestanden (18 / 30 nötig)')+'</div>';
+      } else {
+        var pct=total?Math.round(ok*100/total):0;
+        html+='<div class="score-banner '+(pct>=60?'pass':'fail')+'">🎯 Modelltest '+mt+' · '+MOD[m]+': '+ok+' / '+total+' ('+pct+'%)</div>';
+      }
+    }
+    lastOpts={items:items,html:html,onlySol:onlySol};
+    paint();
+    elOc.classList.remove('hide');
+    elOc.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function paint(){
+    if(!lastOpts) return;
+    var h=lastOpts.html;
+    lastOpts.items.forEach(function(it){
+      if(filter==='e'&&!lastOpts.onlySol&&!it.err) return;
+      h+='<div class="qbox '+it.cls+'">'+it.txt+'</div>';
+    });
+    elOut.innerHTML=h;
+  }
+  $('flt').onclick=function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    filter=b.dataset.f;
+    document.querySelectorAll('#flt button').forEach(function(x){x.classList.toggle('on',x===b);});
+    paint();
+  };
+
+  $('go').onclick=function(){evaluate(false);};
+  $('show').onclick=function(){evaluate(true);};
+  $('clr').onclick=function(){
+    var r=range(), k=key(); S.ans[k]=S.ans[k]||{};
+    for(var q=r[0];q<=r[1];q++) delete S.ans[k][q];
+    save(); renderGrid(); elOc.classList.add('hide'); lastOpts=null;
+  };
+  function changed(){renderGrid(); elOc.classList.add('hide'); lastOpts=null;}
+  elMt.onchange=changed; elTl.onchange=changed;
+  elMd.onchange=function(){fillTl(); changed();};
+
+  fillTl(); renderGrid();
+})();
+</script>
+</body>
+</html>
